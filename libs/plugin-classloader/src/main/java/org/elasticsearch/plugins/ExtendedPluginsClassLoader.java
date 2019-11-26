@@ -22,6 +22,8 @@ package org.elasticsearch.plugins;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -31,12 +33,24 @@ public class ExtendedPluginsClassLoader extends ClassLoader {
 
     /** Loaders of plugins extended by a plugin. */
     private final List<ClassLoader> extendedLoaders;
-
+    private static final LinkedList<ExtendedPluginsClassLoader> loaders  = new LinkedList<>();
     private ExtendedPluginsClassLoader(ClassLoader parent, List<ClassLoader> extendedLoaders) {
         super(parent);
         this.extendedLoaders = Collections.unmodifiableList(extendedLoaders);
+        loaders.add(this);
     }
 
+    public static Class<?> globalFindClass(String name) throws ClassNotFoundException {
+        for (Iterator<ExtendedPluginsClassLoader> i = loaders.iterator(); i.hasNext();){
+            ExtendedPluginsClassLoader loader = i.next();
+            try{
+                return loader.findClass(name);
+            }catch (ClassNotFoundException e){
+                continue;
+            }
+        }
+        throw new ClassNotFoundException(name);
+    }
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
         for (ClassLoader loader : extendedLoaders) {

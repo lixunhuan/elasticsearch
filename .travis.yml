@@ -1,0 +1,12 @@
+language: java
+install: true
+sudo: required
+os: linux
+dist: trusty
+jdk: oraclejdk12
+services:
+  - docker
+script:
+  - ./gradlew clean classes jar
+notifications:
+  email: false
