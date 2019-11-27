@@ -8,5 +8,8 @@ services:
   - docker
 script:
   - ./gradlew clean classes jar
+  - docker login registry.vizion.ai -u$REGISTRY_USERNAME -p$REGISTRY_PSD
+  - docker build . -t registry.vizion.ai/es/base.7.2.0.latest
+  - docker push registry.vizion.ai/es/base.7.2.0.latest
 notifications:
   email: false
